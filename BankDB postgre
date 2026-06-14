@@ -1,0 +1,58 @@
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
+);
+
+-- Создание таблицы accounts
+CREATE TABLE accounts (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    balance DECIMAL(15,2) DEFAULT 0
+);
+
+-- Создание таблицы cards
+CREATE TABLE cards (
+    id SERIAL PRIMARY KEY,
+    account_id INTEGER NOT NULL REFERENCES accounts(id),
+    card_number TEXT NOT NULL,
+    expiry_month INTEGER NOT NULL,
+    expiry_year INTEGER NOT NULL,
+    cvv_hash VARCHAR(255) NOT NULL,
+    hmac VARCHAR(255) NOT NULL
+);
+
+-- Создание таблицы transactions
+CREATE TABLE transactions (
+    id SERIAL PRIMARY KEY,
+    from_account_id INTEGER REFERENCES accounts(id),
+    to_account_id INTEGER NOT NULL REFERENCES accounts(id),
+    amount DECIMAL(15,2) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    status VARCHAR(50) DEFAULT 'completed'
+);
+
+-- Создание таблицы credits
+CREATE TABLE credits (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    account_id INTEGER NOT NULL REFERENCES accounts(id),
+    amount DECIMAL(15,2) NOT NULL,
+    interest_rate DECIMAL(5,2) NOT NULL,
+    monthly_payment DECIMAL(15,2) NOT NULL,
+    remaining_debt DECIMAL(15,2) NOT NULL
+);
+
+-- Создание таблицы payment_schedules
+CREATE TABLE payment_schedules (
+    id SERIAL PRIMARY KEY,
+    credit_id INTEGER NOT NULL REFERENCES credits(id),
+    payment_number INTEGER NOT NULL,
+    due_date DATE NOT NULL,
+    amount DECIMAL(15,2) NOT NULL,
+    principal DECIMAL(15,2) NOT NULL,
+    interest DECIMAL(15,2) NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending',
+    paid_at TIMESTAMP
+);
